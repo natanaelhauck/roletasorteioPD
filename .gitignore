@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+*.local
+.vite
+.playwright-cli
+/desktop.png
+/mobile.png
+/winner.png
+/LogoPDhorizontal@2x.png
