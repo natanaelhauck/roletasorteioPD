@@ -4,11 +4,14 @@ import {
   Gift,
   LoaderCircle,
   MapPin,
+  Radio,
   Sparkles,
   Zap,
 } from 'lucide-react'
 import HistoryPanel from './components/HistoryPanel'
 import ParticipantsPanel from './components/ParticipantsPanel'
+import PrizeArtwork from './components/PrizeArtwork'
+import PrizeQueue from './components/PrizeQueue'
 import Wheel from './components/Wheel'
 import WinnerModal from './components/WinnerModal'
 import { useLocalStorage } from './hooks/useLocalStorage'
@@ -17,6 +20,7 @@ import {
   mergeUniqueNames,
   normalizeName,
 } from './utils/names'
+import { createPrize, DEFAULT_PRIZES } from './utils/prizes'
 
 const STORAGE_PREFIX = 'roleta-pd'
 
@@ -50,7 +54,10 @@ export default function App() {
     EXAMPLE_PARTICIPANTS,
   )
   const [history, setHistory] = useLocalStorage(`${STORAGE_PREFIX}:history`, [])
-  const [prize, setPrize] = useLocalStorage(`${STORAGE_PREFIX}:prize`, 'Mouse gamer')
+  const [prizes, setPrizes] = useLocalStorage(
+    `${STORAGE_PREFIX}:prizes`,
+    DEFAULT_PRIZES,
+  )
   const [removeWinner, setRemoveWinner] = useLocalStorage(
     `${STORAGE_PREFIX}:remove-winner`,
     true,
@@ -59,6 +66,7 @@ export default function App() {
   const [isSpinning, setIsSpinning] = useState(false)
   const [winnerResult, setWinnerResult] = useState(null)
   const pendingResult = useRef(null)
+  const currentPrize = prizes[0]
 
   function addParticipants(names) {
     setParticipants((current) => mergeUniqueNames(current, names))
@@ -68,8 +76,35 @@ export default function App() {
     setParticipants((current) => current.filter((_, itemIndex) => itemIndex !== index))
   }
 
+  function addPrize(name) {
+    setPrizes((current) => [...current, createPrize(name)])
+  }
+
+  function editPrize(id, name) {
+    setPrizes((current) =>
+      current.map((prize) => (
+        prize.id === id
+          ? { ...prize, name: name.trim().replace(/\s+/g, ' ') }
+          : prize
+      )),
+    )
+  }
+
+  function movePrize(index, direction) {
+    setPrizes((current) => {
+      const targetIndex = index + direction
+      if (targetIndex < 0 || targetIndex >= current.length) return current
+      const reordered = [...current]
+      ;[reordered[index], reordered[targetIndex]] = [
+        reordered[targetIndex],
+        reordered[index],
+      ]
+      return reordered
+    })
+  }
+
   function spin() {
-    if (isSpinning || participants.length < 2) return
+    if (isSpinning || participants.length < 2 || !currentPrize) return
 
     const randomValues = new Uint32Array(1)
     window.crypto.getRandomValues(randomValues)
@@ -83,8 +118,9 @@ export default function App() {
 
     pendingResult.current = {
       winner,
-      prize: prize.trim(),
-      index: winnerIndex,
+      prize: currentPrize.name,
+      prizeId: currentPrize.id,
+      prizeImage: currentPrize.image,
     }
     setWinnerResult(null)
     setIsSpinning(true)
@@ -100,10 +136,12 @@ export default function App() {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       winner: result.winner,
       prize: result.prize,
+      prizeImage: result.prizeImage,
       timestamp: new Date().toISOString(),
     }
 
     setHistory((current) => [historyEntry, ...current])
+    setPrizes((current) => current.filter((prize) => prize.id !== result.prizeId))
     if (removeWinner) {
       setParticipants((current) =>
         current.filter((name) => normalizeName(name) !== normalizeName(result.winner)),
@@ -111,7 +149,7 @@ export default function App() {
     }
     setIsSpinning(false)
     setWinnerResult(historyEntry)
-  }, [isSpinning, removeWinner, setHistory, setParticipants])
+  }, [isSpinning, removeWinner, setHistory, setParticipants, setPrizes])
 
   return (
     <div className="app-shell">
@@ -119,17 +157,26 @@ export default function App() {
       <div className="ambient ambient-two" />
 
       <header className="topbar">
-        <img
-          className="brand-logo"
-          src="/assets/LogoPDhorizontal@2x.png"
-          alt="Projeto Desenvolve"
-        />
-        <div className="event-pill">
+        <div className="brand-lockup">
+          <div className="logo-frame">
+            <img
+              className="brand-logo"
+              src="/assets/LogoPDhorizontal@2x.png"
+              alt="Projeto Desenvolve"
+            />
+          </div>
+          <div className="brand-event-copy">
+            <span>Projeto Desenvolve</span>
+            <strong><MapPin size={13} /> Itabira</strong>
+          </div>
+        </div>
+
+        <div className="event-status">
           <span className="live-dot" />
-          <span>Sorteio ao vivo</span>
-          <i />
-          <MapPin size={14} />
-          <span>Itabira</span>
+          <div>
+            <small><Radio size={12} /> Evento presencial</small>
+            <strong>Sorteio ao vivo</strong>
+          </div>
         </div>
       </header>
 
@@ -145,9 +192,9 @@ export default function App() {
 
         <section className="draw-area">
           <div className="draw-heading">
-            <span className="eyebrow"><Sparkles size={14} /> Hora de descobrir</span>
-            <h1>Quem leva o prêmio?</h1>
-            <p>A sorte está lançada. Boa sorte, devs!</p>
+            <span className="eyebrow"><Sparkles size={14} /> Edição Itabira</span>
+            <h1>A roda decide.</h1>
+            <p>Um giro, um nome, uma conquista.</p>
           </div>
 
           <Wheel
@@ -158,27 +205,41 @@ export default function App() {
           />
 
           <div className="draw-controls">
-            <label className="prize-field">
-              <Gift size={18} />
-              <span>Prêmio da rodada</span>
-              <input
-                value={prize}
-                onChange={(event) => setPrize(event.target.value)}
-                placeholder="Ex.: Fone bluetooth"
-                disabled={isSpinning}
-              />
-            </label>
+            <div className="current-prize-card">
+              {currentPrize ? (
+                <>
+                  <PrizeArtwork
+                    image={currentPrize.image}
+                    name={currentPrize.name}
+                    className="current-prize-art"
+                    eager
+                  />
+                  <div>
+                    <span><Gift size={12} /> Prêmio da vez</span>
+                    <strong title={currentPrize.name}>{currentPrize.name}</strong>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="current-prize-empty"><Gift size={19} /></div>
+                  <div>
+                    <span>Fila encerrada</span>
+                    <strong>Adicione um prêmio</strong>
+                  </div>
+                </>
+              )}
+            </div>
 
             <button
               className="primary-button spin-button"
               type="button"
               onClick={spin}
-              disabled={isSpinning || participants.length < 2}
+              disabled={isSpinning || participants.length < 2 || !currentPrize}
             >
               {isSpinning ? (
-                <><LoaderCircle className="spin-icon" size={20} /> Girando...</>
+                <><LoaderCircle className="spin-icon" size={22} /> Girando...</>
               ) : (
-                <><Zap size={20} fill="currentColor" /> Sortear</>
+                <><Zap size={22} fill="currentColor" /> Sortear</>
               )}
             </button>
 
@@ -193,26 +254,45 @@ export default function App() {
               Remover vencedor da próxima rodada
             </label>
 
-            {participants.length === 1 && (
-              <p className="control-hint">Adicione pelo menos mais um participante.</p>
+            {participants.length < 2 && (
+              <p className="control-hint">Adicione pelo menos dois participantes.</p>
+            )}
+            {!currentPrize && (
+              <p className="control-hint">Adicione um prêmio à fila para sortear.</p>
             )}
           </div>
         </section>
 
-        <HistoryPanel
-          history={history}
-          onClear={() => setHistory([])}
-          onExport={() => exportHistoryCsv(history)}
-        />
+        <aside className="right-rail">
+          <PrizeQueue
+            prizes={prizes}
+            onAdd={addPrize}
+            onEdit={editPrize}
+            onMove={movePrize}
+            onRemove={(id) => setPrizes((current) => current.filter((prize) => prize.id !== id))}
+            onReset={() => setPrizes(DEFAULT_PRIZES)}
+            disabled={isSpinning}
+          />
+          <HistoryPanel
+            history={history}
+            onClear={() => setHistory([])}
+            onExport={() => exportHistoryCsv(history)}
+          />
+        </aside>
       </main>
 
       <footer>
-        <span>Projeto Desenvolve</span>
+        <span>Projeto Desenvolve Itabira</span>
         <i />
         <span>Conectando pessoas ao futuro</span>
       </footer>
 
-      <WinnerModal result={winnerResult} onClose={() => setWinnerResult(null)} />
+      <WinnerModal
+        result={winnerResult}
+        onClose={() => setWinnerResult(null)}
+        onNext={spin}
+        canDrawNext={participants.length >= 2 && prizes.length > 0}
+      />
     </div>
   )
 }

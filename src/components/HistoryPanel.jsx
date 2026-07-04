@@ -26,8 +26,8 @@ export default function HistoryPanel({ history, onClear, onExport }) {
             <article className="history-item" key={draw.id}>
               <div className="trophy-icon"><Trophy size={17} /></div>
               <div>
-                <strong>{draw.winner}</strong>
-                <span><Gift size={12} /> {draw.prize || 'Prêmio surpresa'}</span>
+                <strong title={draw.winner}>{draw.winner}</strong>
+                <span title={draw.prize}><Gift size={12} /> {draw.prize || 'Prêmio surpresa'}</span>
                 <time dateTime={draw.timestamp}>{formatDate(draw.timestamp)}</time>
               </div>
               <span className="draw-number">#{history.length - index}</span>
