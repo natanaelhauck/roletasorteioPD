@@ -36,6 +36,10 @@ function truncateName(name, maxLength) {
   return name.length > maxLength ? `${name.slice(0, maxLength - 1)}…` : name
 }
 
+function normalizeAngle(angle) {
+  return ((angle % 360) + 360) % 360
+}
+
 export default function Wheel({
   participants,
   rotation,
@@ -103,8 +107,9 @@ export default function Wheel({
         {count <= 40 &&
           participants.map((name, index) => {
             const angle = -90 + index * sliceAngle
+            const visualAngle = normalizeAngle(angle + rotation)
             const labelPoint = polarToCartesian(angle, labelRadius)
-            const shouldFlip = angle > 90 && angle < 270
+            const shouldFlip = visualAngle > 90 && visualAngle < 270
             const maxLength = count > 18 ? 10 : count > 10 ? 13 : 17
 
             return (
@@ -133,11 +138,9 @@ export default function Wheel({
 
         <circle cx={CENTER} cy={CENTER} r="54" fill="url(#center-gradient)" stroke="#5b5b78" strokeWidth="3" />
         <circle cx={CENTER} cy={CENTER} r="39" fill="#0b0b14" stroke="#25253b" strokeWidth="2" />
-        <path
-          d="M237 227 L278 250 L237 273 Z"
-          fill="#fff"
-          opacity={isSpinning ? 0.5 : 0.95}
-        />
+        <circle cx={CENTER} cy={CENTER} r="25" fill="none" stroke="rgba(255, 255, 255, 0.16)" strokeWidth="2" />
+        <circle cx={CENTER} cy={CENTER} r="12" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1.5" />
+        <circle cx="238" cy="235" r="7" fill="rgba(255, 255, 255, 0.18)" />
       </svg>
     </div>
   )
