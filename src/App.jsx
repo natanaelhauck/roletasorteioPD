@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Check,
   Gift,
@@ -54,6 +54,10 @@ export default function App() {
     EXAMPLE_PARTICIPANTS,
   )
   const [history, setHistory] = useLocalStorage(`${STORAGE_PREFIX}:history`, [])
+  const [absentParticipants, setAbsentParticipants] = useLocalStorage(
+    `${STORAGE_PREFIX}:absent-participants`,
+    [],
+  )
   const [prizes, setPrizes] = useLocalStorage(
     `${STORAGE_PREFIX}:prizes`,
     DEFAULT_PRIZES,
@@ -66,10 +70,13 @@ export default function App() {
   const [isSpinning, setIsSpinning] = useState(false)
   const [winnerResult, setWinnerResult] = useState(null)
   const pendingResult = useRef(null)
+  const spinTimeout = useRef(null)
   const currentPrize = prizes[0]
+  const absentNames = new Set(absentParticipants.map((item) => item.normalizedName))
 
   function addParticipants(names) {
-    setParticipants((current) => mergeUniqueNames(current, names))
+    const allowedNames = names.filter((name) => !absentNames.has(normalizeName(String(name ?? ''))))
+    setParticipants((current) => mergeUniqueNames(current, allowedNames))
   }
 
   function removeParticipant(index) {
@@ -78,6 +85,14 @@ export default function App() {
 
   function addPrize(name) {
     setPrizes((current) => [...current, createPrize(name)])
+  }
+
+  function restoreAbsentParticipant(id) {
+    const participant = absentParticipants.find((item) => item.id === id)
+    if (!participant) return
+
+    setAbsentParticipants((current) => current.filter((item) => item.id !== id))
+    setParticipants((current) => mergeUniqueNames(current, [participant.name]))
   }
 
   function editPrize(id, name) {
@@ -103,14 +118,15 @@ export default function App() {
     })
   }
 
-  function spin() {
-    if (isSpinning || participants.length < 2 || !currentPrize) return
+  function spin(participantPool = participants, prizeForDraw = currentPrize) {
+    if (!Array.isArray(participantPool)) participantPool = participants
+    if (isSpinning || participantPool.length < 1 || !prizeForDraw) return
 
     const randomValues = new Uint32Array(1)
     window.crypto.getRandomValues(randomValues)
-    const winnerIndex = randomValues[0] % participants.length
-    const winner = participants[winnerIndex]
-    const segmentAngle = 360 / participants.length
+    const winnerIndex = randomValues[0] % participantPool.length
+    const winner = participantPool[winnerIndex]
+    const segmentAngle = 360 / participantPool.length
     const desiredRotation = (360 - winnerIndex * segmentAngle) % 360
     const currentNormalized = ((rotation % 360) + 360) % 360
     const alignment = (desiredRotation - currentNormalized + 360) % 360
@@ -118,38 +134,90 @@ export default function App() {
 
     pendingResult.current = {
       winner,
-      prize: currentPrize.name,
-      prizeId: currentPrize.id,
-      prizeImage: currentPrize.image,
+      prize: prizeForDraw.name,
+      prizeId: prizeForDraw.id,
+      prizeImage: prizeForDraw.image,
     }
     setWinnerResult(null)
     setIsSpinning(true)
     setRotation((current) => current + turns * 360 + alignment)
+    window.clearTimeout(spinTimeout.current)
+    spinTimeout.current = window.setTimeout(() => {
+      completePendingSpin()
+    }, 5200)
   }
 
-  const finishSpin = useCallback(() => {
-    if (!isSpinning || !pendingResult.current) return
+  function completePendingSpin() {
+    if (!pendingResult.current) return
 
     const result = pendingResult.current
     pendingResult.current = null
-    const historyEntry = {
+    window.clearTimeout(spinTimeout.current)
+    spinTimeout.current = null
+
+    setIsSpinning(false)
+    setWinnerResult({
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       winner: result.winner,
       prize: result.prize,
       prizeImage: result.prizeImage,
+      prizeId: result.prizeId,
       timestamp: new Date().toISOString(),
-    }
+    })
+  }
 
+  function finishSpin() {
+    if (!isSpinning) return
+    completePendingSpin()
+  }
+
+  function confirmWinnerPresence() {
+    if (!winnerResult) return
+
+    const historyEntry = {
+      id: winnerResult.id,
+      winner: winnerResult.winner,
+      prize: winnerResult.prize,
+      prizeImage: winnerResult.prizeImage,
+      timestamp: winnerResult.timestamp,
+    }
     setHistory((current) => [historyEntry, ...current])
-    setPrizes((current) => current.filter((prize) => prize.id !== result.prizeId))
+    setPrizes((current) => current.filter((prize) => prize.id !== winnerResult.prizeId))
     if (removeWinner) {
       setParticipants((current) =>
-        current.filter((name) => normalizeName(name) !== normalizeName(result.winner)),
+        current.filter((name) => normalizeName(name) !== normalizeName(winnerResult.winner)),
       )
     }
-    setIsSpinning(false)
-    setWinnerResult(historyEntry)
-  }, [isSpinning, removeWinner, setHistory, setParticipants, setPrizes])
+    setWinnerResult(null)
+  }
+
+  function markWinnerAbsentAndRedraw() {
+    if (!winnerResult) return
+
+    const normalizedWinner = normalizeName(winnerResult.winner)
+    const absentEntry = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      name: winnerResult.winner,
+      normalizedName: normalizedWinner,
+      prize: winnerResult.prize,
+      prizeImage: winnerResult.prizeImage,
+      timestamp: new Date().toISOString(),
+    }
+    const nextParticipants = participants.filter(
+      (name) => normalizeName(name) !== normalizedWinner,
+    )
+
+    setAbsentParticipants((current) => {
+      if (current.some((item) => item.normalizedName === normalizedWinner)) return current
+      return [absentEntry, ...current]
+    })
+    setParticipants(nextParticipants)
+    setWinnerResult(null)
+
+    if (nextParticipants.length > 0 && currentPrize) {
+      spin(nextParticipants, currentPrize)
+    }
+  }
 
   return (
     <div className="app-shell">
@@ -183,11 +251,17 @@ export default function App() {
       <main className="dashboard">
         <ParticipantsPanel
           participants={participants}
+          absentParticipants={absentParticipants}
           onAdd={addParticipants}
           onRemove={removeParticipant}
-          onReset={() => setParticipants(EXAMPLE_PARTICIPANTS)}
+          onReset={() => {
+            setParticipants(EXAMPLE_PARTICIPANTS)
+            setAbsentParticipants([])
+          }}
           onClear={() => setParticipants([])}
-          disabled={isSpinning}
+          onRestoreAbsent={restoreAbsentParticipant}
+          onClearAbsent={() => setAbsentParticipants([])}
+          disabled={isSpinning || !!winnerResult}
         />
 
         <section className="draw-area">
@@ -233,8 +307,8 @@ export default function App() {
             <button
               className="primary-button spin-button"
               type="button"
-              onClick={spin}
-              disabled={isSpinning || participants.length < 2 || !currentPrize}
+              onClick={() => spin()}
+              disabled={isSpinning || !!winnerResult || participants.length < 1 || !currentPrize}
             >
               {isSpinning ? (
                 <><LoaderCircle className="spin-icon" size={22} /> Girando...</>
@@ -254,8 +328,12 @@ export default function App() {
               Remover vencedor da próxima rodada
             </label>
 
-            {participants.length < 2 && (
-              <p className="control-hint">Adicione pelo menos dois participantes.</p>
+            {participants.length < 1 && (
+              <p className="control-hint">
+                {participants.length === 0 && absentParticipants.length > 0
+                  ? 'Todos os participantes ativos foram marcados como ausentes. Reintegre alguém ou importe novos nomes.'
+                  : 'Adicione pelo menos um participante ativo.'}
+              </p>
             )}
             {!currentPrize && (
               <p className="control-hint">Adicione um prêmio à fila para sortear.</p>
@@ -271,7 +349,7 @@ export default function App() {
             onMove={movePrize}
             onRemove={(id) => setPrizes((current) => current.filter((prize) => prize.id !== id))}
             onReset={() => setPrizes(DEFAULT_PRIZES)}
-            disabled={isSpinning}
+            disabled={isSpinning || !!winnerResult}
           />
           <HistoryPanel
             history={history}
@@ -289,9 +367,9 @@ export default function App() {
 
       <WinnerModal
         result={winnerResult}
-        onClose={() => setWinnerResult(null)}
-        onNext={spin}
-        canDrawNext={participants.length >= 2 && prizes.length > 0}
+        onConfirmPresent={confirmWinnerPresence}
+        onMarkAbsent={markWinnerAbsentAndRedraw}
+        canRedrawAfterAbsent={participants.length > 1}
       />
     </div>
   )

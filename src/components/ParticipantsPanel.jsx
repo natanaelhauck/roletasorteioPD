@@ -5,6 +5,8 @@ import {
   RotateCcw,
   Trash2,
   Upload,
+  UserCheck,
+  UserMinus,
   UserRound,
   Users,
   X,
@@ -13,10 +15,13 @@ import { getFirstCsvColumn } from '../utils/names'
 
 export default function ParticipantsPanel({
   participants,
+  absentParticipants,
   onAdd,
   onRemove,
   onReset,
   onClear,
+  onRestoreAbsent,
+  onClearAbsent,
   disabled,
 }) {
   const [singleName, setSingleName] = useState('')
@@ -134,9 +139,43 @@ export default function ParticipantsPanel({
         )}
       </div>
 
+      {absentParticipants.length > 0 && (
+        <div className="absent-box" aria-live="polite">
+          <div className="absent-summary">
+            <div>
+              <span><UserMinus size={13} /> Ausentes neste evento</span>
+              <p>Nomes ausentes não voltam para a roleta em novas importações.</p>
+            </div>
+            <strong>{absentParticipants.length}</strong>
+          </div>
+
+          <div className="absent-list">
+            {absentParticipants.map((participant) => (
+              <article className="absent-row" key={participant.id}>
+                <div>
+                  <strong title={participant.name}>{participant.name}</strong>
+                  <span title={participant.prize}>{participant.prize || 'Prêmio da vez'}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onRestoreAbsent(participant.id)}
+                  disabled={disabled}
+                  aria-label={`Reintegrar ${participant.name} à lista`}
+                >
+                  <UserCheck size={14} /> Reintegrar
+                </button>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="panel-actions">
         <button type="button" onClick={onReset} disabled={disabled}>
           <RotateCcw size={15} /> Usar exemplos
+        </button>
+        <button type="button" onClick={onClearAbsent} disabled={disabled || !absentParticipants.length}>
+          <UserCheck size={15} /> Limpar ausentes
         </button>
         <button type="button" className="danger-text" onClick={onClear} disabled={disabled || !participants.length}>
           <Trash2 size={15} /> Limpar

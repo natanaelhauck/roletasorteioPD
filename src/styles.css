@@ -450,12 +450,129 @@ textarea:focus {
   background: rgba(255, 47, 104, 0.1);
 }
 
+.absent-box {
+  margin: 10px 12px 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 159, 26, 0.2);
+  border-radius: 12px;
+  background:
+    linear-gradient(115deg, rgba(255, 159, 26, 0.08), rgba(255, 47, 146, 0.035)),
+    rgba(8, 8, 16, 0.68);
+}
+
+.absent-summary {
+  min-height: 58px;
+  padding: 10px 11px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 159, 26, 0.13);
+}
+
+.absent-summary span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffb454;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.absent-summary p {
+  margin: 5px 0 0;
+  color: #77778c;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.absent-summary strong {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 159, 26, 0.25);
+  border-radius: 9px;
+  color: #ffd08c;
+  background: rgba(255, 159, 26, 0.09);
+  font-family: 'Chakra Petch', sans-serif;
+}
+
+.absent-list {
+  max-height: 128px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #3d3544 transparent;
+}
+
+.absent-row {
+  min-height: 46px;
+  padding: 8px 9px 8px 11px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid rgba(48, 48, 65, 0.45);
+}
+
+.absent-row:first-child {
+  border-top: 0;
+}
+
+.absent-row div {
+  min-width: 0;
+}
+
+.absent-row strong,
+.absent-row span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.absent-row strong {
+  color: #f0eef5;
+  font-size: 11px;
+}
+
+.absent-row span {
+  margin-top: 3px;
+  color: #8e8da0;
+  font-size: 8px;
+}
+
+.absent-row button {
+  min-height: 29px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #3f3a4c;
+  border-radius: 8px;
+  color: #cfc9dc;
+  background: #171521;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.absent-row button:hover:not(:disabled) {
+  color: #fff;
+  border-color: #65567f;
+  background: #242032;
+}
+
 .panel-actions {
   min-height: 51px;
   padding: 9px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
   border-top: 1px solid var(--border);
   background: rgba(9, 9, 17, 0.45);
 }
@@ -512,6 +629,7 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 14px;
   animation: reveal 0.6s 0.06s ease-out both;
 }
 
@@ -544,9 +662,10 @@ textarea:focus {
   position: relative;
   width: min(520px, 100%);
   aspect-ratio: 1;
-  margin: 8px auto -8px;
+  margin: 8px auto 18px;
   display: grid;
   place-items: center;
+  pointer-events: none;
 }
 
 .wheel-aura {
@@ -557,6 +676,7 @@ textarea:focus {
   opacity: 0.22;
   filter: blur(28px);
   animation: aura 7s linear infinite;
+  pointer-events: none;
 }
 
 .wheel {
@@ -567,6 +687,7 @@ textarea:focus {
   overflow: visible;
   filter: drop-shadow(0 22px 25px rgba(0, 0, 0, 0.48));
   will-change: transform;
+  pointer-events: none;
 }
 
 .wheel-label {
@@ -590,36 +711,68 @@ textarea:focus {
 
 .wheel-pointer {
   position: absolute;
-  z-index: 5;
-  top: 1.5%;
+  z-index: 6;
+  top: -6px;
   left: 50%;
-  width: 52px;
-  height: 67px;
+  width: 66px;
+  height: 84px;
   transform: translateX(-50%);
-  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.6));
+  filter:
+    drop-shadow(0 12px 15px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 0 16px rgba(255, 47, 146, 0.25));
+  pointer-events: none;
 }
 
 .wheel-pointer::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 7px;
-  width: 38px;
-  height: 38px;
-  border: 4px solid #fff;
+  left: 50%;
+  width: 48px;
+  height: 52px;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  border-radius: 17px 17px 20px 20px;
+  background:
+    radial-gradient(circle at 33% 22%, rgba(255, 255, 255, 0.72), transparent 19%),
+    linear-gradient(145deg, #ff55a7 4%, #b139ff 54%, #6b55ff 100%);
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.42),
+    inset 0 -8px 16px rgba(35, 8, 63, 0.28),
+    0 0 26px rgba(255, 47, 146, 0.38);
+  transform: translateX(-50%);
+}
+
+.wheel-pointer::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.82);
   border-radius: 50%;
-  background: linear-gradient(145deg, #ff4d91, #ea1e70);
-  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.4), 0 0 22px rgba(255, 47, 146, 0.4);
+  background: #171124;
+  box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.22);
+  transform: translateX(-50%);
 }
 
 .wheel-pointer span {
   position: absolute;
-  top: 30px;
-  left: 12px;
-  width: 28px;
-  height: 35px;
+  top: 47px;
+  left: 50%;
+  width: 29px;
+  height: 34px;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.92);
+  transform: translateX(-50%);
+}
+
+.wheel-pointer span::after {
+  content: '';
+  position: absolute;
+  inset: 3px 4px 5px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(180deg, #d84fff, #ff2f92 72%);
 }
 
 .wheel-pointer.is-spinning {
@@ -627,11 +780,14 @@ textarea:focus {
 }
 
 .draw-controls {
+  position: relative;
+  z-index: 4;
   width: min(480px, 94%);
   display: grid;
   grid-template-columns: minmax(0, 1fr) 145px;
   gap: 10px;
   align-items: stretch;
+  pointer-events: auto;
 }
 
 .prize-field {
@@ -705,6 +861,7 @@ textarea:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  pointer-events: auto;
 }
 
 .spin-button:disabled {
@@ -1128,8 +1285,9 @@ footer i {
   }
 
   .wheel-stage {
-    width: min(500px, 103vw);
-    margin-left: -1.5vw;
+    width: min(500px, 100%);
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .participant-list {
@@ -1620,7 +1778,7 @@ footer i {
 .wheel-stage {
   width: min(555px, 100%);
   margin-top: 2px;
-  margin-bottom: -17px;
+  margin-bottom: 20px;
 }
 
 .wheel-aura {
@@ -1638,13 +1796,14 @@ footer i {
 }
 
 .wheel-pointer {
-  top: 0;
+  top: -6px;
 }
 
 .draw-controls {
   width: min(535px, 96%);
   grid-template-columns: minmax(0, 1fr) 164px;
   gap: 11px;
+  margin-top: 0;
 }
 
 .current-prize-card {
@@ -1709,6 +1868,7 @@ footer i {
 
 .spin-button {
   position: relative;
+  z-index: 5;
   min-height: 66px;
   overflow: hidden;
   font-size: 18px;
@@ -1721,6 +1881,7 @@ footer i {
 .spin-button::after {
   content: '';
   position: absolute;
+  pointer-events: none;
   top: -80%;
   left: -35%;
   width: 35%;
@@ -1764,6 +1925,7 @@ footer i {
   background: var(--particle-color);
   box-shadow: 0 0 10px color-mix(in srgb, var(--particle-color), transparent 35%);
   animation: particle-fall var(--particle-duration) var(--particle-delay) linear infinite;
+  pointer-events: none;
 }
 
 .celebration-particles span:nth-child(3n) {
@@ -1844,6 +2006,7 @@ footer i {
   border: 1px dashed rgba(171, 142, 255, 0.24);
   border-radius: 50%;
   animation: aura 18s linear infinite;
+  pointer-events: none;
 }
 
 .prize-orbit::before,
@@ -1967,16 +2130,16 @@ footer i {
 .winner-actions {
   margin-top: 30px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 92px;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
-.next-draw-button,
-.close-result-button {
+.confirm-presence-button,
+.absence-button {
   min-height: 50px;
 }
 
-.next-draw-button {
+.confirm-presence-button {
   padding: 0 18px;
   display: flex;
   align-items: center;
@@ -1985,20 +2148,51 @@ footer i {
   font-size: 14px;
 }
 
-.close-result-button {
+.absence-button {
   border: 1px solid #3b384b;
   border-radius: 12px;
-  color: #a4a2b0;
-  background: #171521;
-  font-size: 11px;
-  font-weight: 700;
+  color: #f0dce8;
+  background:
+    linear-gradient(115deg, rgba(255, 47, 146, 0.12), rgba(255, 159, 26, 0.05)),
+    #171521;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 800;
   cursor: pointer;
 }
 
-.close-result-button:hover {
+.absence-button:hover {
   color: white;
-  border-color: #565267;
+  border-color: #7b5872;
   background: #211f2d;
+}
+
+.presence-question {
+  margin-top: 21px;
+  padding: 15px 16px;
+  border: 1px solid rgba(133, 86, 255, 0.25);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 12% 0, rgba(255, 47, 146, 0.12), transparent 42%),
+    rgba(11, 11, 20, 0.66);
+}
+
+.presence-question strong {
+  display: block;
+  color: #fff;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 18px;
+}
+
+.presence-question span {
+  display: block;
+  margin-top: 6px;
+  color: #8b899c;
+  font-size: 10px;
+  line-height: 1.5;
 }
 
 .next-draw-hint {
@@ -2097,8 +2291,9 @@ footer i {
   }
 
   .wheel-stage {
-    width: min(530px, 102vw);
-    margin-left: -1vw;
+    width: min(530px, 100%);
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .prize-list,
@@ -2186,10 +2381,11 @@ footer i {
   }
 
   .wheel-stage {
-    width: 105vw;
-    margin-top: -2px;
-    margin-left: calc((100% - 105vw) / 2);
-    margin-bottom: -8px;
+    width: 100%;
+    margin-top: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 14px;
   }
 
   .draw-controls {
@@ -2254,9 +2450,62 @@ footer i {
     grid-template-columns: 1fr;
   }
 
-  .next-draw-button,
-  .close-result-button {
+  .confirm-presence-button,
+  .absence-button {
     min-height: 46px;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 820px) {
+  .topbar {
+    min-height: 82px;
+  }
+
+  .brand-logo {
+    width: 250px;
+    height: 43px;
+  }
+
+  .event-status {
+    min-height: 47px;
+  }
+
+  .dashboard {
+    min-height: calc(100vh - 126px);
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .draw-area {
+    gap: 8px;
+  }
+
+  .draw-heading h1 {
+    margin-top: 5px;
+    font-size: clamp(30px, 2.8vw, 39px);
+  }
+
+  .draw-heading p {
+    margin-top: 5px;
+  }
+
+  .wheel-stage {
+    width: min(450px, 100%);
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .draw-controls {
+    width: min(500px, 96%);
+  }
+
+  .participant-list {
+    height: clamp(190px, 29vh, 300px);
+  }
+
+  .prize-list,
+  .right-rail .history-list {
+    height: 142px;
   }
 }
 

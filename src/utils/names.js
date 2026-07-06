@@ -10,7 +10,7 @@ export const EXAMPLE_PARTICIPANTS = [
 ]
 
 export function normalizeName(name) {
-  return name
+  return String(name ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .trim()
