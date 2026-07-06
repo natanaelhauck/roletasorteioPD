@@ -106,10 +106,11 @@ export default function Wheel({
 
         {count <= 40 &&
           participants.map((name, index) => {
-            const angle = -90 + index * sliceAngle
-            const visualAngle = normalizeAngle(angle + rotation)
-            const labelPoint = polarToCartesian(angle, labelRadius)
-            const shouldFlip = visualAngle > 90 && visualAngle < 270
+            const centerAngle = -90 + index * sliceAngle
+            const normalizedAngle = normalizeAngle(centerAngle)
+            const labelPoint = polarToCartesian(centerAngle, labelRadius)
+            const shouldFlip = normalizedAngle > 90 && normalizedAngle < 270
+            const labelRotation = centerAngle + (shouldFlip ? 180 : 0)
             const maxLength = count > 18 ? 10 : count > 10 ? 13 : 17
 
             return (
@@ -118,8 +119,8 @@ export default function Wheel({
                 x={labelPoint.x}
                 y={labelPoint.y}
                 dy="0.35em"
-                transform={`rotate(${angle + (shouldFlip ? 180 : 0)} ${labelPoint.x} ${labelPoint.y})`}
-                textAnchor={shouldFlip ? 'start' : 'end'}
+                transform={`rotate(${labelRotation} ${labelPoint.x} ${labelPoint.y})`}
+                textAnchor="middle"
                 className="wheel-label"
                 fontSize={labelSize}
               >
@@ -136,11 +137,7 @@ export default function Wheel({
           </g>
         )}
 
-        <circle cx={CENTER} cy={CENTER} r="54" fill="url(#center-gradient)" stroke="#5b5b78" strokeWidth="3" />
-        <circle cx={CENTER} cy={CENTER} r="39" fill="#0b0b14" stroke="#25253b" strokeWidth="2" />
-        <circle cx={CENTER} cy={CENTER} r="25" fill="none" stroke="rgba(255, 255, 255, 0.16)" strokeWidth="2" />
-        <circle cx={CENTER} cy={CENTER} r="12" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1.5" />
-        <circle cx="238" cy="235" r="7" fill="rgba(255, 255, 255, 0.18)" />
+        <circle cx={CENTER} cy={CENTER} r="54" fill="url(#center-gradient)" stroke="rgba(255, 255, 255, 0.22)" strokeWidth="2.5" />
       </svg>
     </div>
   )
