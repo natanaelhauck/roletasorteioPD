@@ -1363,7 +1363,7 @@ footer i {
   }
 }
 
-/* Refinamento para o evento de Itabira */
+/* Refinamento visual do evento */
 .topbar {
   width: min(1540px, calc(100% - 40px));
   min-height: 98px;
@@ -1536,7 +1536,6 @@ footer i {
   height: 100%;
   display: block;
   object-fit: contain;
-  mix-blend-mode: multiply;
 }
 
 .prize-artwork-placeholder {
@@ -1618,26 +1617,201 @@ footer i {
   margin: auto;
 }
 
-.add-prize-form {
-  margin: 0 14px 10px;
+.prize-registration {
+  margin: 0 14px 12px;
+  padding: 11px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 37px;
-  gap: 7px;
+  gap: 10px;
+  border: 1px solid #2f2f42;
+  border-radius: 10px;
+  background: rgba(10, 10, 18, 0.72);
 }
 
-.add-prize-form input {
-  height: 37px;
-  padding: 0 10px;
+.prize-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px;
+  gap: 8px;
+}
+
+.prize-name-field,
+.prize-quantity-field {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.prize-name-field > span,
+.prize-quantity-field > span,
+.prize-templates > span {
+  color: #77778c;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.prize-name-field input,
+.prize-quantity-field input {
+  width: 100%;
+  height: 36px;
+  padding: 0 9px;
   font-size: 10px;
 }
 
-.prize-add {
+.prize-quantity-field input {
+  text-align: center;
+}
+
+.prize-upload-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.prize-upload-preview {
+  width: 58px;
+  height: 58px;
+}
+
+.prize-upload-copy {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.prize-upload-button,
+.remove-upload-button {
+  min-height: 29px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #39394d;
+  border-radius: 7px;
+  color: #c0bfd0;
+  background: #1a1a27;
+  font-size: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.prize-upload-button:hover,
+.remove-upload-button:hover:not(:disabled) {
+  color: #fff;
+  border-color: #505069;
+  background: #232333;
+}
+
+.prize-upload-button.is-loading {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.prize-upload-button input,
+.prize-image-edit input {
+  display: none;
+}
+
+.remove-upload-button {
+  color: #a1a0b2;
+}
+
+.prize-upload-copy small {
+  width: 100%;
+  overflow: hidden;
+  color: #646477;
+  font-size: 7px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.prize-upload-copy .selected-image-name {
+  color: #aaa9bb;
+  white-space: nowrap;
+}
+
+.prize-templates {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.prize-templates > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.prize-templates button {
+  min-width: 0;
+  height: 43px;
+  padding: 4px;
+  display: grid;
+  grid-template-columns: 31px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #303043;
+  border-radius: 7px;
+  color: #a9a8ba;
+  background: #12121d;
+  cursor: pointer;
+}
+
+.prize-templates button:hover:not(:disabled) {
+  color: #fff;
+  border-color: #4c4967;
+  background: #1a1927;
+}
+
+.prize-template-art {
+  width: 31px;
+  height: 31px;
+  border-radius: 6px;
+}
+
+.prize-templates button > span {
+  min-width: 0;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 7px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.prize-form-error {
+  margin: -2px 0 0;
+  color: #ff789f;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.add-prize-button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 8px;
   color: white;
-  background: linear-gradient(135deg, #7045e6, #277eea);
+  background: linear-gradient(110deg, #6f43df, #287ee8);
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.add-prize-button:hover:not(:disabled) {
+  filter: brightness(1.09);
 }
 
 .prize-list {
-  height: 176px;
+  height: 190px;
   padding: 0 9px 0 13px;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -1645,11 +1819,11 @@ footer i {
 }
 
 .prize-row {
-  min-height: 43px;
+  min-height: 47px;
   display: grid;
-  grid-template-columns: 25px minmax(0, 1fr) auto;
+  grid-template-columns: 22px 30px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   border-bottom: 1px solid rgba(48, 48, 65, 0.58);
   color: #bdbccc;
 }
@@ -1666,6 +1840,12 @@ footer i {
 
 .prize-row.is-next .queue-position {
   color: #ff9f28;
+}
+
+.prize-row-art {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
 }
 
 .prize-name {
@@ -1690,7 +1870,8 @@ footer i {
 }
 
 .prize-row-actions button,
-.prize-edit button {
+.prize-edit button,
+.prize-image-edit {
   width: 23px;
   height: 25px;
   padding: 0;
@@ -1704,9 +1885,15 @@ footer i {
 }
 
 .prize-row-actions button:hover:not(:disabled),
-.prize-edit button:hover:not(:disabled) {
+.prize-edit button:hover:not(:disabled),
+.prize-image-edit:hover {
   color: #fff;
   background: #29293a;
+}
+
+.prize-image-edit.is-loading {
+  cursor: wait;
+  opacity: 0.45;
 }
 
 .prize-row-actions button:last-child:hover:not(:disabled) {
@@ -1724,6 +1911,16 @@ footer i {
 .prize-edit input {
   height: 28px;
   padding: 0 6px;
+  font-size: 9px;
+}
+
+.prize-list-empty {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 7px;
+  color: #5f5f73;
   font-size: 9px;
 }
 

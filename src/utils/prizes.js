@@ -13,25 +13,20 @@ export const PRIZE_CATALOG = {
   },
 }
 
-export const DEFAULT_PRIZES = [
-  ...Array.from({ length: 3 }, (_, index) => ({
-    id: `headset-${index + 1}`,
-    ...PRIZE_CATALOG.headset,
-  })),
-  ...Array.from({ length: 3 }, (_, index) => ({
-    id: `mouse-${index + 1}`,
-    ...PRIZE_CATALOG.mouse,
-  })),
-  {
-    id: 'keyboard-1',
-    ...PRIZE_CATALOG.keyboard,
-  },
+export const PRIZE_TEMPLATES = [
+  PRIZE_CATALOG.headset,
+  PRIZE_CATALOG.mouse,
+  PRIZE_CATALOG.keyboard,
 ]
 
-export function createPrize(name) {
+export const DEFAULT_PRIZES = []
+
+export function createPrize(prize) {
+  const data = typeof prize === 'string' ? { name: prize } : prize
+
   return {
     id: `prize-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    name: name.trim().replace(/\s+/g, ' '),
-    image: null,
+    name: data.name.trim().replace(/\s+/g, ' '),
+    image: data.image || null,
   }
 }

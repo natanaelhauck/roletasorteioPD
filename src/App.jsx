@@ -3,7 +3,6 @@ import {
   Check,
   Gift,
   LoaderCircle,
-  MapPin,
   Radio,
   Sparkles,
   Zap,
@@ -20,7 +19,7 @@ import {
   mergeUniqueNames,
   normalizeName,
 } from './utils/names'
-import { createPrize, DEFAULT_PRIZES } from './utils/prizes'
+import { createPrize, DEFAULT_PRIZES, PRIZE_TEMPLATES } from './utils/prizes'
 
 const STORAGE_PREFIX = 'roleta-pd'
 
@@ -83,8 +82,10 @@ export default function App() {
     setParticipants((current) => current.filter((_, itemIndex) => itemIndex !== index))
   }
 
-  function addPrize(name) {
-    setPrizes((current) => [...current, createPrize(name)])
+  function addPrize(prize, quantity = 1) {
+    const safeQuantity = Math.max(1, Math.min(99, Number(quantity) || 1))
+    const newPrizes = Array.from({ length: safeQuantity }, () => createPrize(prize))
+    setPrizes((current) => [...current, ...newPrizes])
   }
 
   function restoreAbsentParticipant(id) {
@@ -95,11 +96,17 @@ export default function App() {
     setParticipants((current) => mergeUniqueNames(current, [participant.name]))
   }
 
-  function editPrize(id, name) {
+  function editPrize(id, changes) {
     setPrizes((current) =>
       current.map((prize) => (
         prize.id === id
-          ? { ...prize, name: name.trim().replace(/\s+/g, ' ') }
+          ? {
+              ...prize,
+              ...changes,
+              name: changes.name
+                ? changes.name.trim().replace(/\s+/g, ' ')
+                : prize.name,
+            }
           : prize
       )),
     )
@@ -235,7 +242,7 @@ export default function App() {
           </div>
           <div className="brand-event-copy">
             <span>Projeto Desenvolve</span>
-            <strong><MapPin size={13} /> Itabira</strong>
+            <strong>Sorteio ao vivo</strong>
           </div>
         </div>
 
@@ -266,7 +273,7 @@ export default function App() {
 
         <section className="draw-area">
           <div className="draw-heading">
-            <span className="eyebrow"><Sparkles size={14} /> Edição Itabira</span>
+            <span className="eyebrow"><Sparkles size={14} /> Evento presencial</span>
             <h1>A roda decide.</h1>
             <p>Um giro, um nome, uma conquista.</p>
           </div>
@@ -349,6 +356,7 @@ export default function App() {
             onMove={movePrize}
             onRemove={(id) => setPrizes((current) => current.filter((prize) => prize.id !== id))}
             onReset={() => setPrizes(DEFAULT_PRIZES)}
+            templates={PRIZE_TEMPLATES}
             disabled={isSpinning || !!winnerResult}
           />
           <HistoryPanel
@@ -360,7 +368,7 @@ export default function App() {
       </main>
 
       <footer>
-        <span>Projeto Desenvolve Itabira</span>
+        <span>Projeto Desenvolve</span>
         <i />
         <span>Conectando pessoas ao futuro</span>
       </footer>
